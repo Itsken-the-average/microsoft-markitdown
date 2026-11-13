@@ -18,7 +18,7 @@ your-project/
     └── notes.md
 ```
 
-# How to run in powershell
-it can also convert youtube video into .md file just replace the path with the actual URL
-
-# if you want to be enlighten watch the youtube tutorial
+```
+-it can also convert youtube video into .md file just replace the path with the actual URL
+-if you want to be enlighten watch the youtube tutorial
+```
