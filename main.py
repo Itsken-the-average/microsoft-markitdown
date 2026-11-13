@@ -5,68 +5,34 @@
 from pathlib import Path
 from markitdown import MarkItDown
 
-INPUT_FOLDER = Path("documents")
-OUTPUT_FOLDER = Path("result")
-
-# File types MarkItDown can handle
-SUPPORTED = {
-    ".pdf",
-    ".docx",
-    ".xlsx",
-    ".pptx",
-    ".html",
-    ".htm",
-    ".txt",
-    ".csv",
-    ".json",
-    ".xml",
-}
+OUTPUT_FOLDER = "result"
 
 
-def convert_file(md, file_path):
-    print(f"Converting {file_path.name}...")
-    result = md.convert(str(file_path))
-
-    output_file = OUTPUT_FOLDER / (file_path.stem + ".md")
-    output_file.write_text(result.text_content, encoding="utf-8")
-    print(f"  Saved to {output_file}")
-
-
-def main():
-    if not INPUT_FOLDER.exists():
-        print(
-            f"Folder '{INPUT_FOLDER}' not found. Create it and put your files inside."
-        )
-        return
-
-    OUTPUT_FOLDER.mkdir(exist_ok=True)
-
-    files = [
-        f
-        for f in INPUT_FOLDER.iterdir()
-        if f.is_file() and f.suffix.lower() in SUPPORTED
-    ]
-
-    if not files:
-        print(f"No supported files found in '{INPUT_FOLDER}'.")
-        return
-
+def convert_to_markdown(file_path):
     md = MarkItDown()
-    done, failed = 0, 0
 
-    for file_path in files:
-        try:
-            convert_file(md, file_path)
-            done += 1
-        except Exception as e:
-            print(f"  Failed: {file_path.name} -> {e}")
-            failed += 1
+    print(f"Converting {file_path}...")
+    result = md.convert(file_path)
 
-    print(f"\nDone. {done} converted, {failed} failed.")
+    # Make the result folder if it doesn't exist
+    Path(OUTPUT_FOLDER).mkdir(exist_ok=True)
+
+    # Same name as the source, but .md, inside result/
+    output_file = Path(OUTPUT_FOLDER) / (Path(file_path).stem + ".md")
+    output_file.write_text(result.text_content, encoding="utf-8")
+
+    print(f"Saved successfully to {output_file}")
 
 
 if __name__ == "__main__":
-    main()
+    # Change this to any file you want to convert
+    sample_file = "documents/INTEGRATION-OF-ANALYTICS-ON-PM-IN-IT-ORGANIZATIONS.pdf"
+
+    try:
+        convert_to_markdown(sample_file)
+    except FileNotFoundError:
+        print(f"File not found: '{sample_file}'")
+      
 
 """ [new files arrangement]
 your-project/
