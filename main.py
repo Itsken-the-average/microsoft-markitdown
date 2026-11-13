@@ -1,38 +1,67 @@
 # terminal cmd or powershell
-# 1 - [ .\.venv\Scripts\Activivate.ps1 ]
+# 1 - [ .\.venv\Scripts\Activate.ps1 ]
 # 2 - [ uv run .\main.py ]
 
+import re
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 from markitdown import MarkItDown
 
 OUTPUT_FOLDER = "result"
+INPUT_FOLDER = "documents/"
 
 
-def convert_to_markdown(file_path):
+def is_url(source):
+    return source.startswith(("http://", "https://"))
+
+
+def get_output_name(source):
+    """Same name as the source (for files) or the video ID (for URLs)."""
+    if not is_url(source):
+        return Path(source).stem
+
+    url = urlparse(source)
+
+    # youtu.be/VIDEO_ID
+    if "youtu.be" in url.netloc:
+        return url.path.strip("/")
+
+    # youtube.com/watch?v=VIDEO_ID
+    video_id = parse_qs(url.query).get("v")
+    if video_id:
+        return video_id[0]
+
+    # Any other website: clean up the address so it's a safe file name
+    return re.sub(r"[^A-Za-z0-9_-]", "_", url.netloc + url.path).strip("_")
+
+
+def convert_to_markdown(source):
     md = MarkItDown()
 
-    print(f"Converting {file_path}...")
-    result = md.convert(file_path)
+    print(f"Converting {source}...")
+    result = md.convert(source)
 
-    # Make the result folder if it doesn't exist
     Path(OUTPUT_FOLDER).mkdir(exist_ok=True)
 
-    # Same name as the source, but .md, inside result/
-    output_file = Path(OUTPUT_FOLDER) / (Path(file_path).stem + ".md")
+    output_file = Path(OUTPUT_FOLDER) / (get_output_name(source) + ".md")
     output_file.write_text(result.text_content, encoding="utf-8")
 
     print(f"Saved successfully to {output_file}")
 
 
 if __name__ == "__main__":
-    # Change this to any file you want to convert
-    sample_file = "documents/INTEGRATION-OF-ANALYTICS-ON-PM-IN-IT-ORGANIZATIONS.pdf"
+    # OPTION 1: a file inside documents/
+    # sample_file = INPUT_FOLDER + "myLibro_SRS.pdf"
+
+    # OPTION 2: a YouTube link or website (no folder in front!)
+    sample_file = "https://youtu.be/8mN16cORwkc?si=7iXyZv-7XhdiqFBc"
 
     try:
         convert_to_markdown(sample_file)
     except FileNotFoundError:
         print(f"File not found: '{sample_file}'")
-      
+    except Exception as e:
+        print(f"Failed: {e}")    
 
 """ [new files arrangement]
 your-project/
